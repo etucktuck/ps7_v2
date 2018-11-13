@@ -3,7 +3,9 @@ package cs1410;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Scanner;
+import cs1410lib.Dialogs;
 
 /**
  * A CacheList is a collection of Cache objects together with these six constraints:
@@ -22,11 +24,23 @@ public class CacheList
     // The caches being managed by this CacheList. They are arranged in
     // ascending order according to cache title.
     private ArrayList<Cache> allCaches;
+
+    /**
+     * Instance for variables for 5 Geocache browser constraints user can search with. If user does not enter a
+     * constraint then the default values are assigned.
+     */
+
+    /** Title of Geocache constraint. Default value is "" */
     private String title;
+    /** Owner name constraint. Default value is "" */
     private String owner;
+    /** Minimum difficulty constraint. Default value 1.0. */
     private double minDifficulty;
+    /** Maximum difficulty constraint. Default value 5.0 */
     private double maxDifficulty;
+    /** Minimum terrain difficulty constraint. Default value 1.0. */
     private double minTerrain;
+    /** Maximum terrain difficulty constraint. Default value 5.0. */
     private double maxTerrain;
 
     /**
@@ -46,7 +60,7 @@ public class CacheList
     public CacheList (Scanner caches) throws IOException
     {
         this.allCaches = new ArrayList<Cache>();
-
+        int lineCount = 1;
         try
         {
             while (caches.hasNextLine())
@@ -54,10 +68,12 @@ public class CacheList
                 String line = caches.nextLine();
                 Cache c = new Cache(line);
                 this.allCaches.add(c);
+                lineCount++;
             }
         }
         catch (IllegalArgumentException e)
         {
+            throw new IllegalArgumentException("" + lineCount);
         }
 
         // Sort the list of caches
@@ -122,6 +138,7 @@ public class CacheList
         {
             Cache c = this.allCaches.get(i);
 
+            // descending if statements comparing CacheList constraints to values in c
             if (c.getTitle().toLowerCase().indexOf(this.title.toLowerCase()) != -1 || this.title == null)
             {
                 if (c.getOwner().toLowerCase().indexOf(this.owner.toLowerCase()) != -1 || this.owner == null)
@@ -145,14 +162,16 @@ public class CacheList
      */
     public ArrayList<String> getOwners ()
     {
-        ArrayList<String> owners = new ArrayList<String>();
+        HashSet<String> ownerSet = new HashSet<String>();
 
         for (int i = 0; i < this.allCaches.size(); i++)
         {
-            owners.add(this.allCaches.get(i).getOwner());
+            ownerSet.add(this.allCaches.get(i).getOwner());
         }
 
-        // Sort the list of owners
+        // copies HashSet of owners into ArrayList of owners
+        ArrayList<String> owners = new ArrayList<String>(ownerSet);
+
         Collections.sort(owners, (s1, s2) -> s1.compareToIgnoreCase(s2));
         return owners;
     }

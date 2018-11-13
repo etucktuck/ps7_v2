@@ -1,158 +1,130 @@
 package cs1410;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 public class CacheTests
 {
-    /**
-     * An example test for Cache objects
-     */
+    public static final Cache cache = new Cache("GCA\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor1 ()
+    {
+        new Cache("GCA\tTitle\tOwner\t1.0\t5.0\tN40 38.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor2 ()
+    {
+        new Cache("GCA\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000\tA+");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor3a ()
+    {
+        new Cache("GC\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor3b ()
+    {
+        new Cache("xyz\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor3c ()
+    {
+        new Cache("GCaB7\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor3d ()
+    {
+        new Cache("GCABCDEFGHIJKLmNOPQRSTUVWXYZ\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor3e ()
+    {
+        new Cache("GC1234567890x1234567890\tTitle\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor4 ()
+    {
+        new Cache("GCA\t\tOwner\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor5 ()
+    {
+        new Cache("GCA\tTitle\t\t1.0\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor6 ()
+    {
+        new Cache("GCA\tTitle\tOwner\t0.5\t5.0\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor7 ()
+    {
+        new Cache("GCA\tTitle\tOwner\t1.0\t5.5\tN40 38.000\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor8 ()
+    {
+        new Cache("GCA\tTitle\tOwner\t1.0\t5.0\t\tW111 45.000");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testConstructor9 ()
+    {
+        new Cache("GCA\tTitle\tOwner\t1.0\t5.0\tN40 38.000\t");
+    }
+    
     @Test
-    public void test ()
+    public void testGetOwner ()
     {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals("GCRQWK", c.getGcCode());
-    }
-    
-    /**
-     * Tests for missing "GC" prefix
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGCErrorNoPrefix ()
-    {
-        Cache c = new Cache("RQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        c.getGcCode();
-    }
-    
-    /**
-     * Error GC code consists of lower-case letter
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGCErrorLowerCase ()
-    {
-        Cache c = new Cache("GCRqWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        c.getGcCode();
-    }
-    
-    /**
-     * Error GC code consists of non digit/alpha character
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGCErrorIllegalCharacter ()
-    {
-        Cache c = new Cache("GCRQ!K\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        c.getGcCode();
-    }
-    
-    /**
-     * Error GC code has no suffix following GC prefix
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGCErrorNoSuffix ()
-    {
-        Cache c = new Cache("GC\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        c.getGcCode();
-    }
-    
-
-    @Test
-    public void testTitle ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals("Old Three Tooth", c.getTitle());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testTitleWhiteSpaceError ()
-    {
-        Cache c = new Cache("GCRQWK\t  \tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        c.getTitle();
-    }
-
-    @Test
-    public void testOwner ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals("geocadet", c.getOwner());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testOwnerWhiteSpaceError ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\t t\t3.5\t3\tN40 45.850\tW111 48.045");
-        c.getOwner();
-    }
-
-    @Test
-    public void testDifficulty ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals(3.5, c.getDifficulty(), 0.0001);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testDifficultyErrorIncorrectRange ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.4\t3\tN40 45.850\tW111 48.045");
-        c.getDifficulty();
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testDifficultyErrorIncorrectRange2 ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t5.1\t3\tN40 45.850\tW111 48.045");
-        c.getDifficulty();
+        assertEquals("Owner", cache.getOwner());
     }
 
     @Test
-    public void testTerrainRating ()
+    public void testGetTitle ()
     {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals(3, c.getTerrain(), 0.0001);
+        assertEquals("Title", cache.getTitle());
     }
 
     @Test
-    public void testLong ()
+    public void testGetDifficulty ()
     {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals("N40 45.850", c.getLongitude());
+        assertEquals(1.0, cache.getDifficulty(), 1e-6);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testLongWhiteSpaceError ()
-    {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\t \tW111 48.045");
-        c.getLongitude();
-    }
-
-    /**
-     * tests latitude properly parses and getLatitude returns proper string
-     */
     @Test
-    public void testLat ()
+    public void testGetTerrain ()
     {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\tW111 48.045");
-        assertEquals("W111 48.045", c.getLatitude());
+        assertEquals(5.0, cache.getTerrain(), 1e-6);
     }
 
-    /**
-     * tests for latitude containing only whitespace, throws exception
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testLatWhiteSpaceError ()
+    @Test
+    public void testGetGcCode ()
     {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\t ");
-        c.getLatitude();
+        assertEquals("GCA", cache.getGcCode());
     }
-    
-    /**
-     * tests for number of attributes > 7, throws exception
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testNumAttributes ()
+
+    @Test
+    public void testGetLatitude ()
     {
-        Cache c = new Cache("GCRQWK\tOld Three Tooth\tgeocadet\t3.5\t3\tN40 45.850\thello");
-        c.getLatitude();
+        assertEquals("N40 38.000", cache.getLatitude());
+    }
+
+    @Test
+    public void testGetLongitude ()
+    {
+        assertEquals("W111 45.000", cache.getLongitude());
     }
 }

@@ -5,12 +5,12 @@ import java.util.NoSuchElementException;
 
 public class MyScanner
 {
+    /** String array containing tokens in MyScanner */
     private String[] tokens;
+    
+    /** Index to keep track of current MyScanner location in String[] tokens */
     private int index;
 
-    public static void main (String[] args)
-    {
-    }
 
     /**
      * Constructs a new MyScanner that produces values scanned from the specified string
@@ -26,13 +26,13 @@ public class MyScanner
      */
     public boolean hasNext ()
     {
-        if (this.index < this.tokens.length)
+        if (this.index >= this.tokens.length || this.tokens[index].length() == 0)
         {
-            return true;
+            return false;
         }
         else
         {
-            return false;
+            return true;
         }
     }
 

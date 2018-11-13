@@ -8,13 +8,30 @@ import javax.swing.plaf.synth.SynthSeparatorUI;
  */
 public class Cache
 {
-    // need to add comments
+    /** 7 attributes pertaining to an instance of a Geocache object. */
+
+    /**
+     * represents the GC Code of a cache. Must contain a string with "GC" followed by one or more upper-case
+     * letter/digits
+     */
     private String GC;
+
+    /** represents the title of the cache. Cannot contain only whitespace characters */
     private String title;
+
+    /** represents the owner of the cache. Cannot contain only whitespace characters */
     private String owner;
+
+    /** represents the difficulty rating of a cache. Must be a double 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, or 5 */
     private double difficultyRating;
+
+    /** represents the terrain difficulty rating of a cache. Must be a double 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, or 5 */
     private double terrainRating;
+
+    /** represents the latitude of the cache. Cannot contain only whitespace */
     private String latitude;
+
+    /** represents the longitude of the cache. Cannot contain only whitespace */
     private String longitude;
 
     /**
@@ -50,6 +67,11 @@ public class Cache
         parseCoordinates(cacheLine[6], "lat");
     }
 
+    /**
+     * Assigns "coord" to instance variable "latitude" or "longitude" depending on "key"
+     * 
+     * @Throws IllegalArgumentException if "coord" contains only whitespace
+     */
     private void parseCoordinates (String coord, String key)
     {
         if (!testWhiteSpace(coord))
@@ -66,6 +88,14 @@ public class Cache
         }
     }
 
+    /**
+     * Converts "rating" into a double and assigns to instance variable "terrainRating" or "difficultyRating" depending
+     * on "key"
+     * 
+     * @Throws IllegalArgumentException if "rating" is a double other than 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5 or 5
+     * @Throws IllegalArgumentException if "rating" does not contain a parsable double
+     * @Throws IllegalArugmentException if "rating" is empty
+     */
     private void parseRating (String rating, String key)
     {
         try
@@ -74,8 +104,7 @@ public class Cache
 
             if ((value * 2) % 1 != 0 || value > 5.0 || value < 1.0)
             {
-                throw new IllegalArgumentException(
-                        key + "rating value other than 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5 or 5.");
+                throw new IllegalArgumentException();
             }
 
             if (key.equals("terrain"))
@@ -89,19 +118,25 @@ public class Cache
         }
         catch (NumberFormatException e)
         {
-            throw new IllegalArgumentException(key + " rating does not contain a parsable double.");
+            throw new IllegalArgumentException();
         }
         catch (NullPointerException e)
         {
-            throw new IllegalArgumentException(key + " rating is empty.");
+            throw new IllegalArgumentException();
         }
     }
 
+    /**
+     * Assigns owner to instance variable "owner"
+     * 
+     * @Throws IllegalArgumentException if owner is length 0 or empty
+     * @Throws IllegalArgumentException if owner contains only whitespace
+     */
     private void parseOwner (String owner)
     {
         if (owner.length() == 0)
         {
-            throw new IllegalArgumentException("Owner name is empty.");
+            throw new IllegalArgumentException();
         }
 
         if (testWhiteSpace(owner))
@@ -110,15 +145,21 @@ public class Cache
         }
         else
         {
-            throw new IllegalArgumentException("Owner name contains only white space characters.");
+            throw new IllegalArgumentException();
         }
     }
 
+    /**
+     * Assigns title to instance variable title
+     * 
+     * @Throws IllegalArgumentException if title is length 0
+     * @Throws IllegalArgumentException if title contains only whitespace
+     */
     private void parseTitle (String title)
     {
         if (title.length() == 0)
         {
-            throw new IllegalArgumentException("Title is empty.");
+            throw new IllegalArgumentException();
         }
 
         if (testWhiteSpace(title))
@@ -127,7 +168,7 @@ public class Cache
         }
         else
         {
-            throw new IllegalArgumentException("Title contains only white space characters.");
+            throw new IllegalArgumentException();
         }
 
     }
@@ -148,9 +189,10 @@ public class Cache
     }
 
     /**
+     * Assigns gcCode to instance variable GC
      * 
      * @Throws IllegalArugmentException for prefix not equal to "GC" in gcCode
-     * @Throws IllegalArgumentException for character in gcCode not character,digit, or uppercase 
+     * @Throws IllegalArgumentException for character in gcCode not character,digit, or uppercase
      * @Throws IllegalArgumentException for no characters following "GC" prefix
      */
     public void parseGC (String gcCode)
@@ -164,7 +206,7 @@ public class Cache
         // if first 2 characters != 'GC', throws exception
         if (!gcCode.substring(0, 2).equals("GC"))
         {
-            throw new IllegalArgumentException("Prefix GC missing for GC code.");
+            throw new IllegalArgumentException();
         }
 
         for (int i = 2; i < gcCode.length(); i++)
@@ -173,12 +215,12 @@ public class Cache
             // if character is neither letter or digit, throws exception
             if (!Character.isLetterOrDigit(tempChar))
             {
-                throw new IllegalArgumentException("Illegal character formatting in GC Code.");
+                throw new IllegalArgumentException();
             }
             // if letter is a character and lowercase, throws exception
             if (Character.isLetter(tempChar) && !Character.isUpperCase(tempChar))
             {
-                throw new IllegalArgumentException("Illegal character formatting in GC Code.");
+                throw new IllegalArgumentException();
             }
         }
         this.GC = gcCode;
