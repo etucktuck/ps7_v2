@@ -9,7 +9,7 @@ import asteroids.game.Participant;
 import asteroids.game.ParticipantCountdownTimer;
 import static asteroids.game.Constants.*;
 
-public class Bullet extends Participant implements AsteroidDestroyer
+public class Bullet extends Participant
 {
     /** Game controller */
     private Controller controller;
@@ -40,24 +40,16 @@ public class Bullet extends Participant implements AsteroidDestroyer
     {
         return this.outline;
     }
-
-    @Override
-    public void collidedWith (Participant p)
-    {
-        if (p instanceof ShipDestroyer)
-        {
-            // Expire the ship from the game
-            Participant.expire(this);
-
-            // Tell the controller the bullet was destroyed
-            controller.bulletDestroyed();
-        }
-    }
     
     @Override
     public void countdownComplete (Object payload)
     {
         Participant.expire(this);
         controller.bulletDestroyed();
+    }
+
+    @Override
+    public void collidedWith (Participant p)
+    {   
     }
 }

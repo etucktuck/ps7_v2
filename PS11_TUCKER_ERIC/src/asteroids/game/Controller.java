@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.swing.*;
 import asteroids.participants.Asteroid;
 import asteroids.participants.Ship;
+import asteroids.participants.ShipBullet;
 import asteroids.participants.Bullet;
 import asteroids.participants.Debris;
 
@@ -174,7 +175,7 @@ public class Controller implements KeyListener, ActionListener
     public void shipDestroyed (Participant p)
     {
         createDebris(p);
-        
+
         // Null out the ship
         ship = null;
 
@@ -194,6 +195,36 @@ public class Controller implements KeyListener, ActionListener
     public void asteroidDestroyed (Participant p)
     {
         createDebris(p);
+
+        // cast p to an asteroid
+        Asteroid a = (Asteroid) p;
+
+        // if asteroid destroyed is not the smallest asteroid then create smaller asteroids
+        if (a.getSize() > 0)
+        {
+            // create 2 new smaller asteroids for every single asteroid destroyed
+            for (int i = 0; i < 2; i++)
+            {
+                int newSpeed = 0;
+
+                // based on size of destroyed asteroid, gets speed of new smaller asteroid
+                if (a.getSize() == 2)
+                {
+                    newSpeed = MAXIMUM_MEDIUM_ASTEROID_SPEED;
+                }
+                else if (a.getSize() == 1)
+                {
+                    newSpeed = MAXIMUM_SMALL_ASTEROID_SPEED;
+                }
+
+                // create new asteroid 1 size smaller than destroyed and at current location
+                Asteroid newAsteroid = new Asteroid(RANDOM.nextInt(4), a.getSize() - 1, a.getX(), a.getY(), newSpeed,
+                        this);
+
+                // add new asteroid into pstate
+                pstate.addParticipant(newAsteroid);
+            }
+        }
 
         // If all the asteroids are gone, schedule a transition
         if (pstate.countAsteroids() == 0)
@@ -291,8 +322,8 @@ public class Controller implements KeyListener, ActionListener
     /** Fires a bullet in the ships current location and direction */
     private void fireBullet ()
     {
-        // create a new bullet with starting x and y location of ships nose and ships rotation
-        Bullet b = new Bullet((int) this.ship.getXNose(), (int) this.ship.getYNose(), this.ship.getRotation(), this);
+        // create a new ship bullet with starting x and y location of ships nose and ships rotation
+        ShipBullet b = new ShipBullet((int) this.ship.getXNose(), (int) this.ship.getYNose(), this.ship.getRotation(), this);
 
         // adds ship to pstate
         pstate.addParticipant(b);

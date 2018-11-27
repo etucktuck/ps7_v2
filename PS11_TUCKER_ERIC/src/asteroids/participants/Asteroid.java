@@ -105,7 +105,7 @@ public class Asteroid extends Participant implements ShipDestroyer
             poly.lineTo(-10, -30);
             poly.closePath();
         }
-        else
+        else if (variety == 3)
         {
             poly.moveTo(30, -18);
             poly.lineTo(5, 5);
