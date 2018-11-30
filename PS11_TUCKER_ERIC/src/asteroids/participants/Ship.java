@@ -18,15 +18,23 @@ public class Ship extends Participant implements AsteroidDestroyer
     /** Game controller */
     private Controller controller;
 
+    /** On and off thruster every other time ship accelerates */
+    private boolean thruster;
+
     /**
      * Constructs a ship at the specified coordinates that is pointed in the given direction.
      */
     public Ship (int x, int y, double direction, Controller controller)
     {
         this.controller = controller;
+        this.thruster = false;
         setPosition(x, y);
         setRotation(direction);
+        setOutline();
+    }
 
+    public void setOutline ()
+    {
         Path2D.Double poly = new Path2D.Double();
         poly.moveTo(21, 0);
         poly.lineTo(-21, 12);
@@ -34,6 +42,14 @@ public class Ship extends Participant implements AsteroidDestroyer
         poly.lineTo(-14, -10);
         poly.lineTo(-21, -12);
         poly.closePath();
+
+        // if thruster on, draws thruster
+        if (this.thruster)
+        {
+            poly.moveTo(-15, -5);
+            poly.lineTo(-25, 0);
+            poly.lineTo(-15, 5);
+        }
         outline = poly;
     }
 
@@ -94,14 +110,13 @@ public class Ship extends Participant implements AsteroidDestroyer
      */
     public void accelerate ()
     {
+        // alternates thruster visual on/off every time ship accelerates
+        this.thruster = !this.thruster;
+        setOutline();
+
         accelerate(SHIP_ACCELERATION);
     }
-    
-    public void fireBullet()
-    {
-        
-    }
-    
+
     /**
      * When a Ship collides with a ShipDestroyer, it expires
      */
@@ -124,17 +139,5 @@ public class Ship extends Participant implements AsteroidDestroyer
     @Override
     public void countdownComplete (Object payload)
     {
-        if(payload.equals("right"))
-        {
-            this.turnRight();
-        }
-        if(payload.equals("left"))
-        {
-            this.turnLeft();
-        }
-        if(payload.equals("forward"))
-        {
-            this.accelerate();
-        }
     }
 }

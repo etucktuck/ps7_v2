@@ -52,6 +52,21 @@ public class Display extends JFrame
         startGame.addActionListener(controller);
     }
 
+    public void setLevel (String level)
+    {
+        screen.setLevel(level);
+    }
+
+    public void setScore (String score)
+    {
+        screen.setScore(score);
+    }
+    
+    public void setLives(int lives)
+    {
+        screen.setLives(lives);
+    }
+
     /**
      * Called when it is time to update the screen display. This is what drives the animation.
      */

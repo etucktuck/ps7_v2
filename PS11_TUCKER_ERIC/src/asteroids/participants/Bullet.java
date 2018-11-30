@@ -2,8 +2,6 @@ package asteroids.participants;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import asteroids.destroyers.AsteroidDestroyer;
-import asteroids.destroyers.ShipDestroyer;
 import asteroids.game.Controller;
 import asteroids.game.Participant;
 import asteroids.game.ParticipantCountdownTimer;
@@ -13,7 +11,7 @@ public class Bullet extends Participant
 {
     /** Game controller */
     private Controller controller;
-    
+
     /** The outline of the ship */
     private Shape outline;
 
@@ -24,32 +22,31 @@ public class Bullet extends Participant
         setOutline();
         this.setPosition(x, y);
         this.setVelocity(BULLET_SPEED, direction);
-        
+
         new ParticipantCountdownTimer(this, BULLET_DURATION);
     }
 
-    private void setOutline()
+    private void setOutline ()
     {
         Ellipse2D.Double bullet = new Ellipse2D.Double(0, 0, 1, 1);
         this.outline = bullet;
     }
-    
+
     /** Outline shape of single bullet */
     @Override
     protected Shape getOutline ()
     {
         return this.outline;
     }
-    
+
     @Override
     public void countdownComplete (Object payload)
     {
         Participant.expire(this);
-        controller.bulletDestroyed();
     }
 
     @Override
     public void collidedWith (Participant p)
-    {   
+    {
     }
 }

@@ -4,6 +4,7 @@ import static asteroids.game.Constants.*;
 import java.awt.*;
 import java.util.Iterator;
 import javax.swing.*;
+import asteroids.participants.Ship;
 
 /**
  * The area of the display in which the game takes place.
@@ -17,6 +18,12 @@ public class Screen extends JPanel
     /** Game controller */
     private Controller controller;
 
+    private String score;
+
+    private String level;
+
+    private int lives;
+
     /**
      * Creates an empty screen
      */
@@ -24,12 +31,29 @@ public class Screen extends JPanel
     {
         this.controller = controller;
         legend = "";
+        score = "";
+        level = "";
         setPreferredSize(new Dimension(SIZE, SIZE));
         setMinimumSize(new Dimension(SIZE, SIZE));
         setBackground(Color.black);
         setForeground(Color.white);
         setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 120));
         setFocusable(true);
+    }
+
+    public void setScore (String score)
+    {
+        this.score = score;
+    }
+
+    public void setLevel (String level)
+    {
+        this.level = level;
+    }
+
+    public void setLives (int lives)
+    {
+        this.lives = lives;
     }
 
     /**
@@ -64,5 +88,21 @@ public class Screen extends JPanel
         // Draw the legend across the middle of the panel
         int size = g.getFontMetrics().stringWidth(legend);
         g.drawString(legend, (SIZE - size) / 2, SIZE / 2);
+
+        // draws score
+        g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, LABEL_VERTICAL_OFFSET));
+        g.drawString(this.score, LABEL_HORIZONTAL_OFFSET, LABEL_VERTICAL_OFFSET * 2);
+
+        // draw amount of lives remaining
+        for (int i = 0; i < this.lives; i++)
+        {
+            Ship life = new Ship(LABEL_HORIZONTAL_OFFSET + (i * LABEL_HORIZONTAL_OFFSET), LABEL_VERTICAL_OFFSET * 3, -Math.PI / 2, null);
+            life.move();
+            life.draw(g);
+        }
+
+        // draws level
+        System.out.println(this.level);
+        g.drawString(this.level, SIZE - LABEL_HORIZONTAL_OFFSET, LABEL_VERTICAL_OFFSET * 2);
     }
 }

@@ -9,7 +9,6 @@ import javax.swing.*;
 import asteroids.participants.Asteroid;
 import asteroids.participants.Ship;
 import asteroids.participants.ShipBullet;
-import asteroids.participants.Bullet;
 import asteroids.participants.Debris;
 
 /**
@@ -42,8 +41,11 @@ public class Controller implements KeyListener, ActionListener
     /** The game display */
     private Display display;
 
-    /** Number of bullets currently in play */
-    private int bulletCount;
+    /** Keeps track of users score */
+    private int score;
+
+    /** Keeps track which level the user is on */
+    private int level;
 
     /**
      * Constructs a controller to coordinate the game and screen
@@ -59,13 +61,13 @@ public class Controller implements KeyListener, ActionListener
         // Clear the transitionTime
         transitionTime = Long.MAX_VALUE;
 
-        // Initialize empty set containing user key presses
-        keyboardPresses = new HashSet<>();
-
         // Record the display object
         display = new Display(this);
 
-        bulletCount = 0;
+        // Initialize empty set containing user key presses
+        keyboardPresses = new HashSet<>();
+
+        level = 1;
 
         // Bring up the splash screen and start the refresh timer
         splashScreen();
@@ -92,9 +94,12 @@ public class Controller implements KeyListener, ActionListener
 
         // Place four asteroids near the corners of the screen.
         placeAsteroids();
-        placeAsteroids();
-        placeAsteroids();
-        placeAsteroids();
+    }
+
+    /** Returns the current users score */
+    public int getScore ()
+    {
+        return this.score;
     }
 
     /**
@@ -119,11 +124,43 @@ public class Controller implements KeyListener, ActionListener
     }
 
     /**
-     * Places an asteroid near one corner of the screen. Gives it a random velocity and rotation.
-     */
+     * Places 4 + current level asteroids on the screen in alternating corners. */
     private void placeAsteroids ()
     {
-        addParticipant(new Asteroid(0, 2, EDGE_OFFSET, EDGE_OFFSET, 3, this));
+        for (int i = 0; i < 3 + this.level; i++)
+        {
+            int corner = i % 4;
+            int x = 0;
+            int y = 0;
+
+            int rand = RANDOM.nextInt((EDGE_OFFSET - EDGE_OFFSET / 2) + 1) + EDGE_OFFSET / 2;
+
+            // upper left corner
+            if (corner == 0)
+            {
+                x = rand;
+                y = rand;
+            }
+            // upper right corner
+            else if (corner == 1)
+            {
+                x = SIZE - rand;
+                y = rand;
+            }
+            // bottom left corner
+            else if (corner == 2)
+            {
+                x = rand;
+                y = SIZE - rand;
+            }
+            // bottom right corner
+            else
+            {
+                x = SIZE - rand;
+                y = SIZE - rand;
+            }
+            addParticipant(new Asteroid(RANDOM.nextInt(4), 2, x, y, 3, this));
+        }
     }
 
     /**
@@ -153,6 +190,10 @@ public class Controller implements KeyListener, ActionListener
         // Reset statistics
         lives = 3;
 
+        score = 0;
+
+        level = 1;
+
         // Start listening to events (but don't listen twice)
         display.removeKeyListener(this);
         display.addKeyListener(this);
@@ -174,7 +215,11 @@ public class Controller implements KeyListener, ActionListener
      */
     public void shipDestroyed (Participant p)
     {
+        // create debris surrounding ship destruction
         createDebris(p);
+
+        // clear keyBoard presses
+        this.keyboardPresses.clear();
 
         // Null out the ship
         ship = null;
@@ -194,29 +239,44 @@ public class Controller implements KeyListener, ActionListener
      */
     public void asteroidDestroyed (Participant p)
     {
+        // creates debris surrounding destruction of asteroid p
         createDebris(p);
 
-        // cast p to an asteroid
+        // cast p as an asteroid
         Asteroid a = (Asteroid) p;
 
-        // if asteroid destroyed is not the smallest asteroid then create smaller asteroids
+        int newSpeed = 0;
+
+        // based on size of destroyed asteroid, gets speed of new smaller asteroid
+        if (a.getSize() == 2)
+        {
+            // increments score 20 points for destroying large asteroid
+            score += 20;
+
+            // A medium-sized asteroid has a randomly chosen speed that lies between slow and medium
+            newSpeed = RANDOM.nextInt((MAXIMUM_MEDIUM_ASTEROID_SPEED - MAXIMUM_LARGE_ASTEROID_SPEED) + 1)
+                    + MAXIMUM_LARGE_ASTEROID_SPEED;
+        }
+        else if (a.getSize() == 1)
+        {
+            // increments score 50 points for destroying medium asteroid
+            score += 50;
+
+            // A small-size asteroid has a randomly chosen speed that lies between slow and fast.
+            newSpeed = RANDOM.nextInt((MAXIMUM_SMALL_ASTEROID_SPEED - MAXIMUM_LARGE_ASTEROID_SPEED) + 1)
+                    + MAXIMUM_LARGE_ASTEROID_SPEED;
+        }
+        else
+        {
+            // increments score 100 points for destroying small asteroid
+            score += 100;
+        }
+
+        // if asteroid destroyed is not the smallest asteroid then create 2 smaller asteroids
         if (a.getSize() > 0)
         {
-            // create 2 new smaller asteroids for every single asteroid destroyed
             for (int i = 0; i < 2; i++)
             {
-                int newSpeed = 0;
-
-                // based on size of destroyed asteroid, gets speed of new smaller asteroid
-                if (a.getSize() == 2)
-                {
-                    newSpeed = MAXIMUM_MEDIUM_ASTEROID_SPEED;
-                }
-                else if (a.getSize() == 1)
-                {
-                    newSpeed = MAXIMUM_SMALL_ASTEROID_SPEED;
-                }
-
                 // create new asteroid 1 size smaller than destroyed and at current location
                 Asteroid newAsteroid = new Asteroid(RANDOM.nextInt(4), a.getSize() - 1, a.getX(), a.getY(), newSpeed,
                         this);
@@ -229,7 +289,11 @@ public class Controller implements KeyListener, ActionListener
         // If all the asteroids are gone, schedule a transition
         if (pstate.countAsteroids() == 0)
         {
+            this.level++;
             scheduleTransition(END_DELAY);
+            clear();
+            placeAsteroids();
+            placeShip();
         }
     }
 
@@ -238,7 +302,7 @@ public class Controller implements KeyListener, ActionListener
     {
         for (int i = 0; i < 4; i++)
         {
-            Debris d = new Debris((int) p.getX(), (int) p.getY(), this);
+            Debris d = new Debris((int) p.getX(), (int) p.getY());
             pstate.addParticipant(d);
         }
     }
@@ -270,66 +334,33 @@ public class Controller implements KeyListener, ActionListener
             // It may be time to make a game transition
             performTransition();
 
-            // Execute
-            executeKeyPresses();
+            // Updates current score
+            display.setScore("" + this.score);
+            
+            display.setLevel("" + this.level);
+            
+            display.setLives(lives);
 
             // Move the participants to their new locations
             pstate.moveParticipants();
+
+            // Execute
+            executeKeyPresses();
 
             // Refresh screen
             display.refresh();
         }
     }
 
-    private void executeKeyPresses ()
-    {
-        if (keyboardPresses.size() > 0)
-        {
-            for (Integer keyCode : keyboardPresses)
-            {
-                if ((keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D) && ship != null)
-                {
-                    this.ship.turnRight();
-                }
-                if ((keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A) && ship != null)
-                {
-                    this.ship.turnLeft();
-                }
-                if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W && ship != null)
-                {
-                    this.ship.accelerate();
-                }
-                if (keyCode == KeyEvent.VK_SPACE || keyCode == KeyEvent.VK_DOWN && ship != null)
-                {
-                    if (bulletCount < BULLET_LIMIT)
-                    {
-                        fireBullet();
-                    }
-                }
-            }
-        }
-    }
-
-    /** When a bullet is removed, decrement bulleCount until 0 */
-    public void bulletDestroyed ()
-    {
-        if (this.bulletCount > 0)
-        {
-            bulletCount--;
-        }
-    }
-
-    /** Fires a bullet in the ships current location and direction */
-    private void fireBullet ()
+    /** Fires a ship bullet in the ships current location and direction */
+    private void fireShipBullet ()
     {
         // create a new ship bullet with starting x and y location of ships nose and ships rotation
-        ShipBullet b = new ShipBullet((int) this.ship.getXNose(), (int) this.ship.getYNose(), this.ship.getRotation(), this);
+        ShipBullet b = new ShipBullet((int) this.ship.getXNose(), (int) this.ship.getYNose(), this.ship.getRotation(),
+                this);
 
         // adds ship to pstate
         pstate.addParticipant(b);
-
-        // increments bullet count
-        this.bulletCount++;
     }
 
     /**
@@ -384,5 +415,35 @@ public class Controller implements KeyListener, ActionListener
     public void keyReleased (KeyEvent e)
     {
         this.keyboardPresses.remove(e.getKeyCode());
+    }
+
+    /** Executes all of the valid key presses held in keyboardPreses */
+    private void executeKeyPresses ()
+    {
+        if (keyboardPresses.size() > 0)
+        {
+            for (Integer keyCode : keyboardPresses)
+            {
+                if ((keyCode == KeyEvent.VK_RIGHT || keyCode == KeyEvent.VK_D) && ship != null)
+                {
+                    this.ship.turnRight();
+                }
+                if ((keyCode == KeyEvent.VK_LEFT || keyCode == KeyEvent.VK_A) && ship != null)
+                {
+                    this.ship.turnLeft();
+                }
+                if ((keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_W) && ship != null)
+                {
+                    this.ship.accelerate();
+                }
+                if ((keyCode == KeyEvent.VK_SPACE || keyCode == KeyEvent.VK_DOWN) && ship != null)
+                {
+                    if (pstate.countBullets() < BULLET_LIMIT)
+                    {
+                        fireShipBullet();
+                    }
+                }
+            }
+        }
     }
 }
