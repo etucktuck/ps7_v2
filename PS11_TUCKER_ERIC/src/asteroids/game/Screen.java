@@ -18,10 +18,13 @@ public class Screen extends JPanel
     /** Game controller */
     private Controller controller;
 
+    /** Current score of game */
     private String score;
 
+    /** Current level of game */
     private String level;
 
+    /** Amount of lives remaining */
     private int lives;
 
     /**
@@ -41,16 +44,19 @@ public class Screen extends JPanel
         setFocusable(true);
     }
 
+    /** Sets the score */
     public void setScore (String score)
     {
         this.score = score;
     }
 
+    /** Sets the level */
     public void setLevel (String level)
     {
         this.level = level;
     }
 
+    /** Sets the amount of lives remaining */
     public void setLives (int lives)
     {
         this.lives = lives;
@@ -96,13 +102,13 @@ public class Screen extends JPanel
         // draw amount of lives remaining
         for (int i = 0; i < this.lives; i++)
         {
-            Ship life = new Ship(LABEL_HORIZONTAL_OFFSET + (i * LABEL_HORIZONTAL_OFFSET), LABEL_VERTICAL_OFFSET * 3, -Math.PI / 2, null);
+            Ship life = new Ship(LABEL_HORIZONTAL_OFFSET + (i * LABEL_HORIZONTAL_OFFSET), LABEL_VERTICAL_OFFSET * 3,
+                    -Math.PI / 2, null);
             life.move();
             life.draw(g);
         }
 
         // draws level
-        System.out.println(this.level);
         g.drawString(this.level, SIZE - LABEL_HORIZONTAL_OFFSET, LABEL_VERTICAL_OFFSET * 2);
     }
 }

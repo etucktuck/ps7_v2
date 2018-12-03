@@ -6,6 +6,7 @@ import java.awt.geom.*;
 import asteroids.destroyers.*;
 import asteroids.game.Controller;
 import asteroids.game.Participant;
+import asteroids.game.ParticipantCountdownTimer;
 
 /**
  * Represents ships
@@ -114,6 +115,8 @@ public class Ship extends Participant implements AsteroidDestroyer
         this.thruster = !this.thruster;
         setOutline();
 
+        // new ParticipantCountdownTimer(this, "thrust", 200);
+
         accelerate(SHIP_ACCELERATION);
     }
 
@@ -139,5 +142,10 @@ public class Ship extends Participant implements AsteroidDestroyer
     @Override
     public void countdownComplete (Object payload)
     {
+        if (payload.equals("thrust"))
+        {
+            this.thruster = false;
+            this.setOutline();
+        }
     }
 }

@@ -6,6 +6,7 @@ import asteroids.game.Participant;
 import asteroids.game.ParticipantCountdownTimer;
 import static asteroids.game.Constants.*;
 
+/** Represents debris after the destruction of a participant */
 public class Debris extends Participant
 {
     /** The outline of the ship */

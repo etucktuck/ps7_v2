@@ -52,16 +52,19 @@ public class Display extends JFrame
         startGame.addActionListener(controller);
     }
 
+    /** Sets the level for the screen to display current level */
     public void setLevel (String level)
     {
         screen.setLevel(level);
     }
 
+    /** Sets the score for the screen to display the current score */
     public void setScore (String score)
     {
         screen.setScore(score);
     }
     
+    /** Sets the amount of lives for the screen to display the current lives remaining */
     public void setLives(int lives)
     {
         screen.setLives(lives);

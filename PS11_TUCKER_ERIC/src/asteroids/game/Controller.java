@@ -35,9 +35,6 @@ public class Controller implements KeyListener, ActionListener
      */
     private long transitionTime;
 
-    /** Number of lives left */
-    private int lives;
-
     /** The game display */
     private Display display;
 
@@ -46,6 +43,9 @@ public class Controller implements KeyListener, ActionListener
 
     /** Keeps track which level the user is on */
     private int level;
+
+    /** Number of lives left */
+    private int lives;
 
     /**
      * Constructs a controller to coordinate the game and screen
@@ -124,7 +124,8 @@ public class Controller implements KeyListener, ActionListener
     }
 
     /**
-     * Places 4 + current level asteroids on the screen in alternating corners. */
+     * Places 4 + current level asteroids on the screen in alternating corners.
+     */
     private void placeAsteroids ()
     {
         for (int i = 0; i < 3 + this.level; i++)
@@ -133,6 +134,7 @@ public class Controller implements KeyListener, ActionListener
             int x = 0;
             int y = 0;
 
+            // random integer position. Range: EDGEOFFSET/2 through EDGE_OFFSET
             int rand = RANDOM.nextInt((EDGE_OFFSET - EDGE_OFFSET / 2) + 1) + EDGE_OFFSET / 2;
 
             // upper left corner
@@ -181,18 +183,27 @@ public class Controller implements KeyListener, ActionListener
         // Clear the screen
         clear();
 
-        // Place asteroids
-        placeAsteroids();
-
-        // Place the ship
-        placeShip();
-
         // Reset statistics
         lives = 3;
 
         score = 0;
 
         level = 1;
+
+        // Place asteroids
+        placeAsteroids();
+
+        // Place the ship
+        placeShip();
+
+        // Updates current score to be displayed
+        display.setScore("" + this.score);
+
+        // Updates current level to be displayed
+        display.setLevel("" + this.level);
+
+        // Updates current lives to be displayed
+        display.setLives(lives);
 
         // Start listening to events (but don't listen twice)
         display.removeKeyListener(this);
@@ -229,6 +240,9 @@ public class Controller implements KeyListener, ActionListener
 
         // Decrement lives
         lives--;
+
+        // Updates current score to be displayed
+        display.setLives(this.lives);
 
         // Since the ship was destroyed, schedule a transition
         scheduleTransition(END_DELAY);
@@ -272,6 +286,9 @@ public class Controller implements KeyListener, ActionListener
             score += 100;
         }
 
+        // Updates current score to be displayed
+        display.setScore("" + this.score);
+
         // if asteroid destroyed is not the smallest asteroid then create 2 smaller asteroids
         if (a.getSize() > 0)
         {
@@ -290,10 +307,8 @@ public class Controller implements KeyListener, ActionListener
         if (pstate.countAsteroids() == 0)
         {
             this.level++;
+            display.setLevel("" + this.level);
             scheduleTransition(END_DELAY);
-            clear();
-            placeAsteroids();
-            placeShip();
         }
     }
 
@@ -333,13 +348,6 @@ public class Controller implements KeyListener, ActionListener
         {
             // It may be time to make a game transition
             performTransition();
-
-            // Updates current score
-            display.setScore("" + this.score);
-            
-            display.setLevel("" + this.level);
-            
-            display.setLives(lives);
 
             // Move the participants to their new locations
             pstate.moveParticipants();
@@ -387,6 +395,16 @@ public class Controller implements KeyListener, ActionListener
             if (lives <= 0)
             {
                 finalScreen();
+
+            }
+            else
+            {
+                placeAsteroids();
+
+                if (this.ship == null)
+                {
+                    placeShip();
+                }
             }
         }
     }
@@ -398,14 +416,6 @@ public class Controller implements KeyListener, ActionListener
     public void keyPressed (KeyEvent e)
     {
         this.keyboardPresses.add(e.getKeyCode());
-    }
-
-    /**
-     * These events are ignored.
-     */
-    @Override
-    public void keyTyped (KeyEvent e)
-    {
     }
 
     /**
@@ -445,5 +455,13 @@ public class Controller implements KeyListener, ActionListener
                 }
             }
         }
+    }
+
+    /**
+     * These events are ignored.
+     */
+    @Override
+    public void keyTyped (KeyEvent e)
+    {
     }
 }
