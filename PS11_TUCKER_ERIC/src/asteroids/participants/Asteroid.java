@@ -10,11 +10,13 @@ import asteroids.destroyers.ShipBulletDestroyer;
 import asteroids.destroyers.ShipDestroyer;
 import asteroids.game.Controller;
 import asteroids.game.Participant;
+import sounds.SoundDemo;
 
 /**
  * Represents asteroids
  */
-public class Asteroid extends Participant implements ShipDestroyer, AlienDestroyer, ShipBulletDestroyer, AlienBulletDestroyer
+public class Asteroid extends Participant
+        implements ShipDestroyer, AlienDestroyer, ShipBulletDestroyer, AlienBulletDestroyer
 {
     /** The size of the asteroid (0 = small, 1 = medium, 2 = large) */
     private int size;
@@ -34,6 +36,7 @@ public class Asteroid extends Participant implements ShipDestroyer, AlienDestroy
      */
     public Asteroid (int variety, int size, double x, double y, int speed, Controller controller)
     {
+        //sounds = sound;
         // Make sure size and variety are valid
         if (size < 0 || size > 2)
         {
@@ -147,6 +150,8 @@ public class Asteroid extends Participant implements ShipDestroyer, AlienDestroy
     {
         if (p instanceof AsteroidDestroyer)
         {
+            getSounds().playSound("smallAst");
+            
             // Expire the asteroid
             Participant.expire(this);
 

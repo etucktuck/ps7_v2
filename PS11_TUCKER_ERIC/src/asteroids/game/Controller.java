@@ -9,6 +9,7 @@ import javax.swing.*;
 import asteroids.participants.Asteroid;
 import asteroids.participants.Ship;
 import asteroids.participants.ShipBullet;
+import sounds.SoundDemo;
 import asteroids.participants.Debris;
 
 /**
@@ -47,6 +48,9 @@ public class Controller implements KeyListener, ActionListener
     /** Number of lives left */
     private int lives;
 
+    /** Class representing sounds to be played */
+    // private SoundDemo sounds;
+
     /**
      * Constructs a controller to coordinate the game and screen
      */
@@ -54,6 +58,8 @@ public class Controller implements KeyListener, ActionListener
     {
         // Initialize the ParticipantState
         pstate = new ParticipantState();
+
+        // sounds = new SoundDemo();
 
         // Set up the refresh timer.
         refreshTimer = new Timer(FRAME_INTERVAL, this);
@@ -270,6 +276,8 @@ public class Controller implements KeyListener, ActionListener
             // A medium-sized asteroid has a randomly chosen speed that lies between slow and medium
             newSpeed = RANDOM.nextInt((MAXIMUM_MEDIUM_ASTEROID_SPEED - MAXIMUM_LARGE_ASTEROID_SPEED) + 1)
                     + MAXIMUM_LARGE_ASTEROID_SPEED;
+
+            // sounds.playSound("largeAst");
         }
         else if (a.getSize() == 1)
         {
@@ -279,11 +287,14 @@ public class Controller implements KeyListener, ActionListener
             // A small-size asteroid has a randomly chosen speed that lies between slow and fast.
             newSpeed = RANDOM.nextInt((MAXIMUM_SMALL_ASTEROID_SPEED - MAXIMUM_LARGE_ASTEROID_SPEED) + 1)
                     + MAXIMUM_LARGE_ASTEROID_SPEED;
+
+            // sounds.playSound("mediumAst");
         }
         else
         {
             // increments score 100 points for destroying small asteroid
             score += 100;
+            // sounds.playSound("smallAst");
         }
 
         // Updates current score to be displayed
