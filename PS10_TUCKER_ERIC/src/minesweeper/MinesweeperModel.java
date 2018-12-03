@@ -294,24 +294,29 @@ public class MinesweeperModel
      */
     private void uncoverEmptyRegionAndBoundary (int row, int col)
     {
-        if (!this.isSquareCovered[row][col])
+        // if square uncovered or flagged, do nothing
+        if (!this.isSquareCovered[row][col] || this.isFlagged(row, col))
         {
             return;
         }
         else
         {
+            // if specified element is EMPTY: uncover element and perform recursive call
             if (this.board[row][col] == EMPTY)
             {
                 this.isSquareCovered[row][col] = false;
 
+                // gets list of all squares adjacent to current square
                 ArrayList<Point> surroundingPoints = this.findSurroundingSquares(row, col);
 
+                // iterate through all adjacent squares looking for more empty squares to uncover
                 for (Point p : surroundingPoints)
                 {
-                    this.uncoverEmptyRegionAndBoundary((int) p.getX(), (int) p.getY());
+                    this.uncoverEmptyRegionAndBoundary(p.x, p.y);
                 }
             }
-            else if (this.board[row][col] != 9)
+            // if specified element is 1-8, uncover element
+            else if (this.board[row][col] >= 1 && this.board[row][col] <= 8)
             {
                 this.isSquareCovered[row][col] = false;
                 return;

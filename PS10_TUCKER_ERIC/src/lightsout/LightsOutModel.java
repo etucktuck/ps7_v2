@@ -2,46 +2,42 @@ package lightsout;
 
 import java.util.Random;
 
+/**
+ * Represents the state of the Lights Out game board. Construction of a new LightsOutModel initiates a randomized 2D
+ * array of booleans. User can select squares on the board to switch the boolean state of given square and consequently
+ * adjacent squares. Goal of the game is to have all squares as false or lights off at the same time.
+ * 
+ * 
+ * Features included: New Game - wipes current game and creates a new random, solvable board state. Manual Setup Mode -
+ * allows user to select 1 square at a time.
+ * 
+ * @author eric tucker
+ */
 public class LightsOutModel
 {
+    /**
+     * Boolean 2D array representing state of the playing board. True for lights on and false for lights off.
+     */
     private boolean board[][];
 
+    /**
+     * True when user enters manual set-up mode.
+     */
     private boolean manualSetupMode;
 
+    /**
+     * True when manualSetupMode switches from true -> false && moveTo hasn't been actioned.
+     */
     private boolean recentlyExitedManual;
 
+    /**
+     * Creates a new Lights Out model beginning with a 2D playing board row x col dimensions. Game begins with a
+     * randomized solvable puzzle.
+     */
     public LightsOutModel (int row, int col)
     {
         this.board = new boolean[row][col];
         this.newGame();
-    }
-
-    public boolean recentlyExitedManual ()
-    {
-        return this.recentlyExitedManual;
-    }
-
-    /**
-     * Reports if all elements in LightsOut are false. Always returns false during manual setup mode.
-     */
-    public boolean checkLightsOut ()
-    {
-        if (this.manualSetupMode)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < this.board.length; i++)
-        {
-            for (int j = 0; j < this.board[i].length; j++)
-            {
-                if (this.board[i][j] == true)
-                {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     /**
@@ -66,8 +62,37 @@ public class LightsOutModel
             this.moveTo(row, col);
 
             // used for solving. COMMENT OUT ON TURN IN
-            System.out.println(row + " " + col);
+            //System.out.println(row + " " + col);
         }
+        // if randomized moves created an already completed state, recalls method
+        if (this.checkLightsOut())
+        {
+            this.newGame();
+        }
+    }
+
+    /**
+     * Reports true if all elements in LightsOut are turned off (false). Always returns false during manual setup mode.
+     */
+    public boolean checkLightsOut ()
+    {
+        // while in manualSetupMode, always reports false
+        if (this.manualSetupMode)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < this.board.length; i++)
+        {
+            for (int j = 0; j < this.board[i].length; j++)
+            {
+                if (this.board[i][j] == true)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -141,6 +166,14 @@ public class LightsOutModel
     }
 
     /**
+     * Returns boolean state of recentlyExitedManual mode.
+     */
+    public boolean recentlyExitedManual ()
+    {
+        return this.recentlyExitedManual;
+    }
+
+    /**
      * Returns if currently in Manual Setup Mode.
      */
     public boolean getMode ()
@@ -149,7 +182,7 @@ public class LightsOutModel
     }
 
     /**
-     * Prints out the current state of the board in a row x col console grid. Used for testing before GUI.
+     * Prints to the console the current state of the board in a row x col console grid. Used for testing before GUI.
      */
     public void print ()
     {
@@ -174,7 +207,7 @@ public class LightsOutModel
     }
 
     /**
-     * Returns if the element in specified row or column is true or false.
+     * Returns the boolean state of the element at the specified row & column.
      */
     public boolean getLight (int row, int col)
     {
@@ -184,5 +217,4 @@ public class LightsOutModel
         }
         return this.board[row][col];
     }
-
 }
