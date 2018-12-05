@@ -6,10 +6,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.*;
+import asteroids.participants.AlienShip;
 import asteroids.participants.Asteroid;
 import asteroids.participants.Ship;
-import asteroids.participants.ShipBullet;
-import sounds.SoundDemo;
 import asteroids.participants.Debris;
 
 /**
@@ -22,6 +21,9 @@ public class Controller implements KeyListener, ActionListener
 
     /** The ship (if one is active) or null (otherwise) */
     private Ship ship;
+
+    /** The Alien ship (if one is active) or null (otherwise) */
+    private AlienShip alien;
 
     /** When this timer goes off, it is time to refresh the animation */
     private Timer refreshTimer;
@@ -48,8 +50,14 @@ public class Controller implements KeyListener, ActionListener
     /** Number of lives left */
     private int lives;
 
-    /** Class representing sounds to be played */
-    // private SoundDemo sounds;
+    /** Represents msec between beats */
+    private int beat;
+
+    private long beatTransition;
+
+    private boolean alienShip;
+
+    private boolean beat1;
 
     /**
      * Constructs a controller to coordinate the game and screen
@@ -67,6 +75,8 @@ public class Controller implements KeyListener, ActionListener
         // Clear the transitionTime
         transitionTime = Long.MAX_VALUE;
 
+        beatTransition = Long.MAX_VALUE;
+
         // Record the display object
         display = new Display(this);
 
@@ -74,6 +84,8 @@ public class Controller implements KeyListener, ActionListener
         keyboardPresses = new HashSet<>();
 
         level = 1;
+
+        alienShip = false;
 
         // Bring up the splash screen and start the refresh timer
         splashScreen();
@@ -125,6 +137,7 @@ public class Controller implements KeyListener, ActionListener
         // Place a new ship
         Participant.expire(ship);
         ship = new Ship(SIZE / 2, SIZE / 2, -Math.PI / 2, this);
+
         addParticipant(ship);
         display.setLegend("");
     }
@@ -179,6 +192,7 @@ public class Controller implements KeyListener, ActionListener
         pstate.clear();
         display.setLegend("");
         ship = null;
+        Participant.expire(ship);
     }
 
     /**
@@ -191,9 +205,7 @@ public class Controller implements KeyListener, ActionListener
 
         // Reset statistics
         lives = 3;
-
         score = 0;
-
         level = 1;
 
         // Place asteroids
@@ -201,6 +213,11 @@ public class Controller implements KeyListener, ActionListener
 
         // Place the ship
         placeShip();
+
+        // sets beat timer
+        this.beat = INITIAL_BEAT;
+        this.beat1 = true;
+        setBeatTimer(beat);
 
         // Updates current score to be displayed
         display.setScore("" + this.score);
@@ -217,6 +234,11 @@ public class Controller implements KeyListener, ActionListener
 
         // Give focus to the game screen
         display.requestFocusInWindow();
+    }
+
+    public void setBeatTimer (int m)
+    {
+        beatTransition = System.currentTimeMillis() + m;
     }
 
     /**
@@ -276,8 +298,6 @@ public class Controller implements KeyListener, ActionListener
             // A medium-sized asteroid has a randomly chosen speed that lies between slow and medium
             newSpeed = RANDOM.nextInt((MAXIMUM_MEDIUM_ASTEROID_SPEED - MAXIMUM_LARGE_ASTEROID_SPEED) + 1)
                     + MAXIMUM_LARGE_ASTEROID_SPEED;
-
-            // sounds.playSound("largeAst");
         }
         else if (a.getSize() == 1)
         {
@@ -287,14 +307,11 @@ public class Controller implements KeyListener, ActionListener
             // A small-size asteroid has a randomly chosen speed that lies between slow and fast.
             newSpeed = RANDOM.nextInt((MAXIMUM_SMALL_ASTEROID_SPEED - MAXIMUM_LARGE_ASTEROID_SPEED) + 1)
                     + MAXIMUM_LARGE_ASTEROID_SPEED;
-
-            // sounds.playSound("mediumAst");
         }
         else
         {
             // increments score 100 points for destroying small asteroid
             score += 100;
-            // sounds.playSound("smallAst");
         }
 
         // Updates current score to be displayed
@@ -314,11 +331,18 @@ public class Controller implements KeyListener, ActionListener
             }
         }
 
-        // If all the asteroids are gone, schedule a transition
+        // if all asteroids destroyed, begins sequence for next level
         if (pstate.countAsteroids() == 0)
         {
+            // increases level and updates display
             this.level++;
             display.setLevel("" + this.level);
+
+            // reset beat counter for next level
+            this.beat = INITIAL_BEAT;
+            this.setBeatTimer(beat);
+
+            // schedules transition for next level to being
             scheduleTransition(END_DELAY);
         }
     }
@@ -371,15 +395,19 @@ public class Controller implements KeyListener, ActionListener
         }
     }
 
-    /** Fires a ship bullet in the ships current location and direction */
-    private void fireShipBullet ()
+    public void placeAlien (int variety)
     {
-        // create a new ship bullet with starting x and y location of ships nose and ships rotation
-        ShipBullet b = new ShipBullet((int) this.ship.getXNose(), (int) this.ship.getYNose(), this.ship.getRotation(),
-                this);
+        int x = -10;
+        int y = RANDOM.nextInt(SIZE);
 
-        // adds ship to pstate
-        pstate.addParticipant(b);
+        double initialDirection = (x < 0) ? 0 : Math.PI;
+
+        if (RANDOM.nextInt(2) == 0)
+        {
+            x = SIZE + 10;
+        }
+        alien = new AlienShip(x, y, initialDirection, this, variety);
+        addParticipant(alien);
     }
 
     /**
@@ -406,17 +434,49 @@ public class Controller implements KeyListener, ActionListener
             if (lives <= 0)
             {
                 finalScreen();
-
             }
             else
             {
-                placeAsteroids();
-
-                if (this.ship == null)
+                // if all asteroids are destroyed
+                if (pstate.countAsteroids() == 0)
+                {
+                    placeAsteroids();
+                }
+                // if ship has been destroyed
+                else if (this.ship == null)
                 {
                     placeShip();
                 }
+                if (level >= 2)
+                {
+                    if (this.alienShip)
+                    {
+                        placeAlien((this.level > 2) ? 1 : 2);
+                        this.alienShip = false;
+                    }
+                    else
+                    {
+                        this.scheduleTransition(ALIEN_DELAY);
+                        this.alienShip = true;
+                    }
+                }
             }
+        }
+
+        if (this.beatTransition <= System.currentTimeMillis())
+        {
+            if (this.beat1)
+            {
+                Participant.getSounds().playSound("beat1");
+            }
+            else
+            {
+                Participant.getSounds().playSound("beat2");
+            }
+            this.beat1 = !this.beat1;
+            this.beatTransition = Long.MAX_VALUE;
+            this.beat = Math.max(FASTEST_BEAT, this.beat - BEAT_DELTA);
+            this.setBeatTimer(beat);
         }
     }
 
@@ -436,6 +496,12 @@ public class Controller implements KeyListener, ActionListener
     public void keyReleased (KeyEvent e)
     {
         this.keyboardPresses.remove(e.getKeyCode());
+
+        // if thruster is released, then tell ship to turn off sound
+        if ((e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_W) && ship != null)
+        {
+            this.ship.thrustRelease();
+        }
     }
 
     /** Executes all of the valid key presses held in keyboardPreses */
@@ -459,13 +525,38 @@ public class Controller implements KeyListener, ActionListener
                 }
                 if ((keyCode == KeyEvent.VK_SPACE || keyCode == KeyEvent.VK_DOWN) && ship != null)
                 {
-                    if (pstate.countBullets() < BULLET_LIMIT)
-                    {
-                        fireShipBullet();
-                    }
+                    ship.fireBullet();
                 }
             }
         }
+    }
+
+    /* Returns the number of active ShipBullet participants */
+    public int getBulletCount ()
+    {
+        return pstate.countBullets();
+    }
+
+    public void alienDestroyed (Participant p, int variety)
+    {
+        createDebris(p);
+        if (variety == 1)
+        {
+            this.score += 200;
+        }
+        else
+        {
+            this.score += 1000;
+        }
+
+        // Refresh screen
+        display.refresh();
+
+        // Places a new Alien in game state
+        this.alienShip = false;
+
+        if (ship != null)
+            this.scheduleTransition(ALIEN_DELAY);
     }
 
     /**

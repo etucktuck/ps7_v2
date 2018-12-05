@@ -3,7 +3,7 @@ package asteroids.game;
 import static asteroids.game.Constants.*;
 import java.awt.*;
 import java.awt.geom.*;
-import sounds.SoundDemo;
+import sounds.AsteroidSounds;
 
 /**
  * Represents a single moving element in an asteroids game. Each Participant object has an outline (used for drawing
@@ -34,7 +34,8 @@ public abstract class Participant
     /** True if the Participant is expired */
     private boolean expired;
     
-    private static SoundDemo sounds = new SoundDemo();
+    /** Creates a static sound object to be used by all participants */
+    private static AsteroidSounds sounds = new AsteroidSounds();
 
     /**
      * Constructs an active Participant with no velocity, rotation, or border.
@@ -319,7 +320,8 @@ public abstract class Participant
         g.draw(border);
     }
     
-    public static SoundDemo getSounds()
+    /* Returns the state of AsteroidSounds to be used by participants */
+    public static AsteroidSounds getSounds()
     {
         return sounds;
     }

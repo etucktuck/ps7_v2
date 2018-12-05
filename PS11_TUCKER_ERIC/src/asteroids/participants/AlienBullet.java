@@ -8,16 +8,16 @@ import asteroids.destroyers.ShipDestroyer;
 import asteroids.game.Controller;
 import asteroids.game.Participant;
 
-public class AlienBullet extends Bullet implements AsteroidDestroyer, ShipDestroyer, ShipBulletDestroyer
+/** Represents a Bullet shot by an Alien ship. Destroys Asteroids and Ships. */
+public class AlienBullet extends Bullet implements AsteroidDestroyer, ShipDestroyer
 {
-    private Controller c;
-
-    public AlienBullet (int x, int y, double direction, Controller c)
+    /** Constructs a new AlienBullet */
+    public AlienBullet (int x, int y, double direction)
     {
-        super(x, y, direction, c);
-        this.c = c;
+        super(x, y, direction);
     }
 
+    /** Expires AlienBullets from participant state when collide with other participants in game state */
     @Override
     public void collidedWith (Participant p)
     {

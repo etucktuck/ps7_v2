@@ -2,23 +2,19 @@ package asteroids.participants;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import asteroids.game.Controller;
 import asteroids.game.Participant;
 import asteroids.game.ParticipantCountdownTimer;
 import static asteroids.game.Constants.*;
 
+/** Represents a generic Bullet in the Asteroids game. To be extended by Alien and Ship Bullets */
 public class Bullet extends Participant
 {
-    /** Game controller */
-    private Controller controller;
-
     /** The outline of the ship */
     private Shape outline;
 
     /** Constructs a new bullet */
-    public Bullet (int x, int y, double direction, Controller c)
+    public Bullet (int x, int y, double direction)
     {
-        this.controller = c;
         setOutline();
         this.setPosition(x, y);
         this.setVelocity(BULLET_SPEED, direction);
@@ -26,6 +22,7 @@ public class Bullet extends Participant
         new ParticipantCountdownTimer(this, BULLET_DURATION);
     }
 
+    /** Creates the outline of the bullet */
     private void setOutline ()
     {
         Ellipse2D.Double bullet = new Ellipse2D.Double(0, 0, 1, 1);
@@ -39,12 +36,14 @@ public class Bullet extends Participant
         return this.outline;
     }
 
+    /** Expires the bullet after BULLET_DURATION */
     @Override
     public void countdownComplete (Object payload)
     {
         Participant.expire(this);
     }
 
+    /** To be overridden by Ship or AlienBullet */
     @Override
     public void collidedWith (Participant p)
     {

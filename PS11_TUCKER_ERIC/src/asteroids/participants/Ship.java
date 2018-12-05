@@ -11,7 +11,7 @@ import asteroids.game.ParticipantCountdownTimer;
 /**
  * Represents ships
  */
-public class Ship extends Participant implements AsteroidDestroyer
+public class Ship extends Participant implements AsteroidDestroyer, AlienBulletDestroyer, AlienDestroyer
 {
     /** The outline of the ship */
     private Shape outline;
@@ -34,6 +34,10 @@ public class Ship extends Participant implements AsteroidDestroyer
         setOutline();
     }
 
+    /**
+     * Sets the shape of the ship. Default ship is drawn with no thruster. If thruster is true, then thruster shape is
+     * also drawn
+     */
     public void setOutline ()
     {
         Path2D.Double poly = new Path2D.Double();
@@ -64,6 +68,22 @@ public class Ship extends Participant implements AsteroidDestroyer
         return point.getX();
     }
 
+    /** Fires a ShipBullet */
+    public void fireBullet ()
+    {
+        if (controller.getBulletCount() < BULLET_LIMIT)
+        {
+            // create a new ship bullet with starting x and y location of ships nose and ships rotation
+            ShipBullet b = new ShipBullet((int) this.getXNose(), (int) this.getYNose(), this.getRotation());
+
+            // adds ship to pstate
+            controller.addParticipant(b);
+
+            // plays bullet sound
+            getSounds().playSound("fire");
+        }
+    }
+
     /**
      * Returns the x-coordinate of the point on the screen where the ship's nose is located.
      */
@@ -74,6 +94,7 @@ public class Ship extends Participant implements AsteroidDestroyer
         return point.getY();
     }
 
+    /** Returns the outline of the ship */
     @Override
     protected Shape getOutline ()
     {
@@ -107,6 +128,19 @@ public class Ship extends Participant implements AsteroidDestroyer
     }
 
     /**
+     * Releases the thruster ending thruster sound loop and setting coutndown timer for 100 msec to flip thruster flame
+     * to off
+     */
+    public void thrustRelease ()
+    {
+        // tells sounds to end thruster loop
+        getSounds().turnOffThrust();
+
+        // sets 100 msec cdown timer to turn thruster strobe off
+        new ParticipantCountdownTimer(this, "thrust", 100);
+    }
+
+    /**
      * Accelerates by SHIP_ACCELERATION
      */
     public void accelerate ()
@@ -115,8 +149,10 @@ public class Ship extends Participant implements AsteroidDestroyer
         this.thruster = !this.thruster;
         setOutline();
 
-        // new ParticipantCountdownTimer(this, "thrust", 200);
+        // begings thruster sound loop
+        getSounds().playSound("thrust");
 
+        // accelerates ship
         accelerate(SHIP_ACCELERATION);
     }
 
@@ -128,6 +164,9 @@ public class Ship extends Participant implements AsteroidDestroyer
     {
         if (p instanceof ShipDestroyer)
         {
+            // Plays ship explosion sound
+            getSounds().playSound("shipDestroyed");
+
             // Expire the ship from the game
             Participant.expire(this);
 
@@ -142,6 +181,7 @@ public class Ship extends Participant implements AsteroidDestroyer
     @Override
     public void countdownComplete (Object payload)
     {
+        // turns thruster strobe off
         if (payload.equals("thrust"))
         {
             this.thruster = false;

@@ -10,7 +10,6 @@ import asteroids.destroyers.ShipBulletDestroyer;
 import asteroids.destroyers.ShipDestroyer;
 import asteroids.game.Controller;
 import asteroids.game.Participant;
-import sounds.SoundDemo;
 
 /**
  * Represents asteroids
@@ -36,7 +35,7 @@ public class Asteroid extends Participant
      */
     public Asteroid (int variety, int size, double x, double y, int speed, Controller controller)
     {
-        //sounds = sound;
+        // sounds = sound;
         // Make sure size and variety are valid
         if (size < 0 || size > 2)
         {
@@ -56,6 +55,7 @@ public class Asteroid extends Participant
         createAsteroidOutline(variety, size);
     }
 
+    /** Returns the shape of this asteroid */
     @Override
     protected Shape getOutline ()
     {
@@ -150,8 +150,19 @@ public class Asteroid extends Participant
     {
         if (p instanceof AsteroidDestroyer)
         {
-            getSounds().playSound("smallAst");
-            
+            if (this.size == 2)
+            {
+                getSounds().playSound("largeAst");
+            }
+            else if (this.size == 1)
+            {
+                getSounds().playSound("mediumAst");
+            }
+            else if (this.size == 0)
+            {
+                getSounds().playSound("smallAst");
+            }
+
             // Expire the asteroid
             Participant.expire(this);
 
